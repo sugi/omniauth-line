@@ -19,6 +19,12 @@ module OmniAuth
         super
       end
 
+      # Drop code param from redirect_uri to avoid redirect_uri mismatch error.
+      def build_access_token
+        verifier = request.params.delete "code"
+        client.auth_code.get_token(verifier, {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true)), deep_symbolize(options.auth_token_params))
+      end
+
       uid { raw_info['userId'] }
 
       info do
