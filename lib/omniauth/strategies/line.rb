@@ -19,6 +19,13 @@ module OmniAuth
         super
       end
 
+      def query_string
+        return super unless "1.4.0" <= OmniAuth::OAuth2::VERSION && OmniAuth::OAuth2::VERSION <= "1.6.0"
+        # Filter out 'code' & 'state' param to avoid redirect_url mismatch error with omniauth-oauth2 >= 1.4.0
+        return '' if request.params.keys.reject{|key| %w(code state).member?(key.to_s)}.empty?
+        "?" + request.query_string.gsub(/\b&?(code|state)=[^;&]*/, '')
+      end
+
       uid { raw_info['userId'] }
 
       info do
